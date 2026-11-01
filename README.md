@@ -98,7 +98,7 @@ To use Spotify, create an app in the [Spotify developer dashboard](https://devel
 npm test
 ```
 
-The 26 tests cover the streaming-history parser (duplicates, old and new field names, bad timestamps), the cluster colour palette, tag filtering and country checks, the artist genre cache (blank results expire after a week), the session cookie (round trip, tampering, wrong secret, no secret), and the API (anonymous access to `/api/universe` is refused, bad and oversized JSON get a JSON error).
+The 28 tests cover the streaming-history parser (duplicates, old and new field names, bad timestamps), the cluster colour palette, tag filtering and country checks, the artist genre cache (blank results expire after a week), the session cookie (round trip, tampering, wrong secret, no secret), and the API (anonymous access to `/api/universe` is refused, bad and oversized JSON get a JSON error).
 
 `tests/tastes/` is a separate quality check for the clustering. It builds histories for eight very different listeners from Last.fm's public charts and scores the clusters against the chart each artist came from. It needs the network and a Last.fm key, so it is not part of CI. Run it with `node tests/tastes/run.mjs` after changing tags, similarity, clustering or naming.
 
