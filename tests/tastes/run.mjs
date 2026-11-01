@@ -1,4 +1,4 @@
-// Runs the full Astra pipeline on each generated listener: parse → genre lookups
+// Runs the full Orbitune pipeline on each generated listener: parse → genre lookups
 // (Wikidata/MusicBrainz/Last.fm, cached in .cache/meta.json) → clustering → names.
 // Usage: node tests/tastes/run.mjs [listener ...]
 import fs from 'fs';

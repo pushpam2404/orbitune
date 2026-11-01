@@ -9,7 +9,7 @@
 import { usefulTags } from './tagFilter.js';
 
 const MB_BASE = 'https://musicbrainz.org/ws/2';
-const USER_AGENT = 'ASTRA-music-universe/1.0 ( https://astra-3d-music-universe.vercel.app )';
+const USER_AGENT = 'Orbitune/1.0 ( https://orbitune-music.vercel.app )';
 const TIMEOUT_MS = 30000;
 // MusicBrainz accepts up to 100 URL resources per lookup.
 const CHUNK_SIZE = 100;

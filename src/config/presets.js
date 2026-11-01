@@ -1,6 +1,6 @@
 // src/config/presets.js
 /**
- * Curated Galaxy Presets for ASTRA // 3D Music Universe
+ * Curated Galaxy Presets for ORBITUNE // 3D Music Universe
  * Provides immediate astrophysical visualization without requiring Spotify login.
  */
 

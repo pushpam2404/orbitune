@@ -11,6 +11,7 @@ import {
   loadStoredUniverseSnapshot,
   saveStoredUniverseSnapshot,
   clearStoredHistory,
+  migrateLegacyLocalStorage,
   parseImportedFiles,
   exportUniverseSnapshotJson,
   exportListeningHistoryCsv
@@ -545,8 +546,8 @@ async function initApp() {
         spotifyApiOnly
       });
       saveArtistMeta(artistMeta);
-      console.info('[Astra] universe diagnostics:', diagnostics);
-      console.info('[Astra] clustering:', JSON.stringify({ ...diagnostics.clusterStats, genreSource: diagnostics.genreSource, doubted: diagnostics.doubtedGenres }));
+      console.info('[Orbitune] universe diagnostics:', diagnostics);
+      console.info('[Orbitune] clustering:', JSON.stringify({ ...diagnostics.clusterStats, genreSource: diagnostics.genreSource, doubted: diagnostics.doubtedGenres }));
       if (!dataset) {
         loadDemo();
         hud.setNotice('Spotify has no listening data for this account yet.');
@@ -826,9 +827,10 @@ async function initApp() {
   }
   applyUrl();
 
-  if (import.meta.env.DEV) window.__astra = { loadDataset, AppState };
+  if (import.meta.env.DEV) window.__orbitune = { loadDataset, AppState };
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  initApp().catch(err => console.error('Astra failed to start:', err));
+  migrateLegacyLocalStorage();
+  initApp().catch(err => console.error('Orbitune failed to start:', err));
 });

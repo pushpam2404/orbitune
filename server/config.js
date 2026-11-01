@@ -33,7 +33,7 @@ export function isSpotifyConfigured() {
   return Boolean(config.clientId && config.clientSecret);
 }
 
-/** e.g. https://astra.vercel.app/api/auth/callback or http://127.0.0.1:5173/api/auth/callback */
+/** e.g. https://orbitune-music.vercel.app/api/auth/callback or http://127.0.0.1:5173/api/auth/callback */
 export function getRedirectUri(req) {
   if (config.redirectUriOverride) return config.redirectUriOverride;
   const proto = req.headers['x-forwarded-proto']?.split(',')[0] || req.protocol;

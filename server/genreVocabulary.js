@@ -9,7 +9,7 @@
  */
 import { squashTag } from '../src/etl/genreSignals.js';
 
-const USER_AGENT = 'ASTRA-music-universe/1.0 ( https://astra-3d-music-universe.vercel.app )';
+const USER_AGENT = 'Orbitune/1.0 ( https://orbitune-music.vercel.app )';
 const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const WIKIDATA_QUERY = `SELECT ?g ?label ?alias WHERE {
   ?g wdt:P31/wdt:P279* wd:Q188451 .

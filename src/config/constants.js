@@ -1,6 +1,6 @@
 // src/config/constants.js
 /**
- * ASTRA // 3D Music Universe - Physical, Visual & Telemetry Constants
+ * ORBITUNE // 3D Music Universe - Physical, Visual & Telemetry Constants
  */
 
 // Visual radius range per tier (log-scaled by play count in graphNormalizer).

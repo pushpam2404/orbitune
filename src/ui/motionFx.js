@@ -1,6 +1,6 @@
 // src/ui/motionFx.js
 /**
- * Motion AI Kit UI Polish Engine for Astra (powered by motion from motion.dev).
+ * Motion AI Kit UI Polish Engine for Orbitune (powered by motion from motion.dev).
  * Provides spring physics, tactile micro-interactions, fluid view transitions,
  * and staggered reveal animations with full prefers-reduced-motion support.
  */

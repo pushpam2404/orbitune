@@ -1,5 +1,5 @@
 {
-  "name": "astra-3d-music-universe",
+  "name": "orbitune",
   "version": "1.0.0",
   "description": "Explore your Spotify listening history as a 3D map: genres as planets, artists as orbiting bodies, songs as moons.",
   "keywords": [
@@ -9,10 +9,10 @@
     "data-visualization",
     "music"
   ],
-  "homepage": "https://astra-3d-music-universe.vercel.app",
+  "homepage": "https://orbitune-music.vercel.app",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pushpam2404/astra-3d-music-universe.git"
+    "url": "git+https://github.com/pushpam2404/orbitune.git"
   },
   "author": "Pushpam Raj Satyarthi",
   "license": "MIT",

@@ -494,7 +494,7 @@ export function parseStreamingEvents(rawEvents) {
     .map(([k, w]) => [k, Number(w.toFixed(2))]);
 
   return {
-    isAstraHistorySummary: true,
+    isOrbituneHistorySummary: true,
     totalEvents: rawEvents.length,
     validPlays: fullPlayCount || validEvents.length,
     totalMs,

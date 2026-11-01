@@ -6,7 +6,7 @@
 import crypto from 'node:crypto';
 import { config } from './config.js';
 
-const SESSION_COOKIE = 'astra_session';
+const SESSION_COOKIE = 'orbitune_session';
 const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 30;
 
 /**
@@ -15,7 +15,7 @@ const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 30;
  */
 export function createCodec(secret) {
   if (!secret) return null;
-  const key = crypto.createHash('sha256').update(`astra-session:${secret}`).digest();
+  const key = crypto.createHash('sha256').update(`orbitune-session:${secret}`).digest();
   return {
     encrypt(obj) {
       const iv = crypto.randomBytes(12);

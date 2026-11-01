@@ -6,7 +6,7 @@ This file provides comprehensive architectural and operational context to Claude
 
 ## 1. Project Overview
 
-**Astra** is a Vite + Three.js interactive 3D music observatory that maps a user's Spotify listening history and live Spotify library into a 3D celestial universe:
+**Orbitune** is a Vite + Three.js interactive 3D music observatory that maps a user's Spotify listening history and live Spotify library into a 3D celestial universe:
 
 * **Cluster Center Planet (`type: 'genre'`)**: A macro-genre or listening community discovered via Louvain community detection, rendered at the center of each cluster as a solid, non-glowing 3D planet (`SphereGeometry(node.baseRadius, 48, 48)` with `solarPlasmaShader.js`).
 * **Artist Planet (`type: 'artist'`)**: An individual artist positioned via 3D UMAP similarity + spherical cloud layout + 3D collision clearance, rendered via `InstancedMesh` (`SphereGeometry(1, 32, 32)` with `planetShader.js`).
@@ -30,7 +30,7 @@ npm start           # production (--production flag, works on Windows): Express 
 * **Running Server Preservation**: If a local server is already running (e.g., on port `5180` or `5173`) and serving `dist/` or Vite middleware, **do not kill or restart the server** unless explicitly asked—run `npx vite build` (`./node_modules/.bin/vite build`) so the user can simply refresh without losing background enrichment progress.
 * **Environment Variables (`.env`)**:
   * `SPOTIFY_CLIENT_ID` & `SPOTIFY_CLIENT_SECRET`: Spotify Developer App credentials.
-  * `SESSION_SECRET`: Secret used to derive the AES-256-GCM key for the stateless `astra_session` cookie (falls back to `SPOTIFY_CLIENT_SECRET`).
+  * `SESSION_SECRET`: Secret used to derive the AES-256-GCM key for the stateless `orbitune_session` cookie (falls back to `SPOTIFY_CLIENT_SECRET`).
   * `LASTFM_API_KEY`: Optional but recommended; enables Last.fm track/artist tag enrichment (`server/lastfm.js`).
   * `PORT`: Local server port (defaults to `5173`, often run on `5180`).
 * **Spotify Loopback Rule**: Spotify rejects `http://localhost`; always use `http://127.0.0.1:<PORT>/api/auth/callback`.
@@ -39,7 +39,7 @@ npm start           # production (--production flag, works on Windows): Express 
 
 ## 3. Non-Negotiable Architectural & Visual Invariants
 
-Any AI agent modifying Astra **must** preserve these invariants:
+Any AI agent modifying Orbitune **must** preserve these invariants:
 
 ### 3.1 Browser-Side History Assembly (Vercel 4.5 MB Limit Defense)
 * **Never** `POST` raw streaming history files or large `historySummary` payloads to `/api/universe`. Vercel serverless functions reject payloads over 4.5 MB with `HTTP 413 Payload Too Large`.
@@ -48,7 +48,7 @@ Any AI agent modifying Astra **must** preserve these invariants:
 
 ### 3.2 Spotify Rate-Limit Defense (HTTP 429 Prevention)
 * **Never** call the Spotify Web API inside background enrichment loops.
-* Live Spotify OAuth signals (`topArtistsByRange`, `topTracksByRange`, `recent`, `saved`) are cached in `localStorage` under `astra_spotify_signals_v1` for **6 hours** (`SPOTIFY_CACHE_TTL_MS` in `src/api/backendClient.js`).
+* Live Spotify OAuth signals (`topArtistsByRange`, `topTracksByRange`, `recent`, `saved`) are cached in `localStorage` under `orbitune_spotify_signals_v1` for **6 hours** (`SPOTIFY_CACHE_TTL_MS` in `src/api/backendClient.js`).
 * Logged-in loads always take the browser path (`buildBrowserHistoryUniverse`), which reads/writes that cache. `fetchUniverse` only sends a logged-in load to the full server path when the server has a local history folder (`/api/history/status`, local dev), because the server path never fills the cache and would call Spotify on every reload.
 * All artist genre/country enrichment goes exclusively through `POST /api/enrich` (`server/enrich.js` → Wikidata SPARQL, MusicBrainz, Last.fm) and is cached per artist in `localStorage` (`src/api/artistMetaCache.js`).
 * **Zero Hardcoding**: Never add hardcoded artist-to-genre or artist-to-country lookup tables.
@@ -89,9 +89,9 @@ Any AI agent modifying Astra **must** preserve these invariants:
 * **Dynamic Resolution & Cluster Scaling (`server/clustering.js`)**:
   * Louvain resolution dynamically scales with library volume ($1.3$ to $2.25$) so large libraries naturally resolve into authentic sub-communities (Hindie, Filmi, Punjabi & Bhangra, Desi Hip-Hop, Synthpop, Ambient) rather than collapsing into monolithic blobs.
   * Cluster count dynamically scales from 8 to 22 ($\approx 8 + \sqrt{\max(0, \text{artists} - 100)} \times 0.21$).
-  * Raising the resolution was tested against the taste tests and lowers ARI (base 1.6: 0.672, 2.0: 0.633, 2.5: 0.565 vs 0.683), so keep it unless the tests say otherwise. Few clusters on sparse data (e.g. Spotify-only, 515 artists → 5) is Louvain finding few communities, not over-merging; the browser console line `[Astra] clustering:` shows `louvainGroups`, `genreGroups` (after dropping genre-less groups), `merges` (duplicate names) and `genreSource`.
+  * Raising the resolution was tested against the taste tests and lowers ARI (base 1.6: 0.672, 2.0: 0.633, 2.5: 0.565 vs 0.683), so keep it unless the tests say otherwise. Few clusters on sparse data (e.g. Spotify-only, 515 artists → 5) is Louvain finding few communities, not over-merging; the browser console line `[Orbitune] clustering:` shows `louvainGroups`, `genreGroups` (after dropping genre-less groups), `merges` (duplicate names) and `genreSource`.
 * **No hardcoded genre knowledge.** There are no genre families, alias tables, mood/junk/broad-tag lists, demonym tables or occupation→genre maps. Don't add any. Every decision comes from public data or from the library itself:
-  * **Which tags are genres** (`src/etl/genreSignals.js` → `selectGenreTags`): a tag is a genre if Wikidata or MusicBrainz lists it as one (catalogue from `server/genreVocabulary.js`, served CDN-cached at `GET /api/genre-vocabulary`, kept 7 days in `localStorage` as `astra_genre_vocab_v1`); it's a home country if it matches an Intl region name; it's a language scene ("tamil", "haryanvi") if it matches an Intl language name; any other tag counts only if it passes the coherence test (the artists carrying it sound alike well above the library's background). Coherent-only tags help grouping but can't name clusters (`nameable`). Each catalogue genre is displayed in the listener's own most-used spelling.
+  * **Which tags are genres** (`src/etl/genreSignals.js` → `selectGenreTags`): a tag is a genre if Wikidata or MusicBrainz lists it as one (catalogue from `server/genreVocabulary.js`, served CDN-cached at `GET /api/genre-vocabulary`, kept 7 days in `localStorage` as `orbitune_genre_vocab_v1`); it's a home country if it matches an Intl region name; it's a language scene ("tamil", "haryanvi") if it matches an Intl language name; any other tag counts only if it passes the coherence test (the artists carrying it sound alike well above the library's background). Coherent-only tags help grouping but can't name clusters (`nameable`). Each catalogue genre is displayed in the listener's own most-used spelling.
   * **How genres relate** (`server/clustering.js` → `buildTagVectors`): TF-IDF over genre + `@country` tags, expanded with tag relatedness learned from co-occurrence in the library (PPMI, `RELATED_WEIGHT`).
   * **Naming** (`server/clusterNaming.js`): BERTopic-style class-based TF-IDF over nameable tags, weighted by √listening, with a consensus floor (`MIN_SUPPORT` of the cluster's listening, at least 2 artists). Never `Artist & Co.`, moods, invented themes, or made-up audio features (there are none: the old hash-based `estimatedFeatures` were removed). If a group can't get an unused real-genre name it returns `duplicateOf` and the groups merge.
   * **Genre groups** (`clusterArtists`): a Louvain group exists only if `MIN_GENRE_SHARE` (25%) of its listening has real genres; otherwise its artists join the most similar genre group (co-listening, collaborations, tags) or **Genre Unknown**. Artists with no signal at all also go to Genre Unknown; never place them by guesswork.
@@ -107,8 +107,8 @@ Any AI agent modifying Astra **must** preserve these invariants:
 ## 4. End-to-End Data & Rendering Flow
 
 1. **Ingestion & Storage**:
-   * **Spotify OAuth**: `/api/auth/login` → `/api/auth/callback` sets the encrypted `astra_session` cookie. `src/api/backendClient.js` fetches live signals (`signalsOnly: true`) and caches them in `localStorage` for 6 hours.
-   * **Extended Streaming History**: Users import `Streaming_History_Audio_*.json` / `StreamingHistory_music_*.json`, `.json` snapshots, or Spotify's export `.zip` as-is via the **History** modal (`src/ui/hud.js`). Zips are read in the browser by `src/api/zipReader.js` (native `DecompressionStream`), because Windows doesn't auto-unzip downloads like Safari; dropped folders are walked with `webkitGetAsEntry`. `src/api/historyStorage.js` parses events via `parseStreamingEvents` (`src/etl/historyParser.js`) and persists `historySummary` in IndexedDB (`astra_history_db`).
+   * **Spotify OAuth**: `/api/auth/login` → `/api/auth/callback` sets the encrypted `orbitune_session` cookie. `src/api/backendClient.js` fetches live signals (`signalsOnly: true`) and caches them in `localStorage` for 6 hours.
+   * **Extended Streaming History**: Users import `Streaming_History_Audio_*.json` / `StreamingHistory_music_*.json`, `.json` snapshots, or Spotify's export `.zip` as-is via the **History** modal (`src/ui/hud.js`). Zips are read in the browser by `src/api/zipReader.js` (native `DecompressionStream`), because Windows doesn't auto-unzip downloads like Safari; dropped folders are walked with `webkitGetAsEntry`. `src/api/historyStorage.js` parses events via `parseStreamingEvents` (`src/etl/historyParser.js`) and persists `historySummary` in IndexedDB (`orbitune_history_db`).
    * **Local Folder Auto-Detection**: `server/historyLoader.js` also detects a local `Spotify Extended Streaming History/` directory when running locally.
 2. **Universe Assembly & Clustering (`src/etl/universeAssembler.js` + `server/clustering.js`)**:
    * `mergeSignalsAndRank` merges Spotify top charts, recent plays, Liked Songs, and `historySummary`, deduplicating tracks by normalized primary artist + cleaned track title and extracting featured collaborators.

@@ -1,6 +1,6 @@
 // src/api/backendClient.js
 /**
- * Thin client for the ASTRA backend (server/). Spotify tokens never reach the browser.
+ * Thin client for the Orbitune backend (server/). Spotify tokens never reach the browser.
  * When browser-imported `historySummary` or cached Spotify signals are present, universe
  * merging & clustering runs directly in the browser so multi-megabyte history payloads
  * never hit serverless request/response limits (HTTP 413 on Vercel) and reloads read
@@ -9,7 +9,7 @@
 
 export const SPOTIFY_LOGIN_URL = '/api/auth/login';
 
-const SPOTIFY_SIGNAL_CACHE_KEY = 'astra_spotify_signals_v1';
+const SPOTIFY_SIGNAL_CACHE_KEY = 'orbitune_spotify_signals_v1';
 const SPOTIFY_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours — protects against Spotify 429 rate limits
 
 const INITIAL_CLIENT_ENRICH_BATCH = 50;
@@ -52,7 +52,7 @@ export function clearCachedSpotifySignals() {
   }
 }
 
-const VOCAB_KEY = 'astra_genre_vocab_v1';
+const VOCAB_KEY = 'orbitune_genre_vocab_v1';
 const VOCAB_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 /**
@@ -249,7 +249,7 @@ export async function fetchUniverse(
     ? (await getHistoryStatus()).available
     : false;
   if (
-    (historySummary?.isAstraHistorySummary && !spotifyApiOnly) ||
+    (historySummary?.isOrbituneHistorySummary && !spotifyApiOnly) ||
     (loggedIn && (spotifyApiOnly || !useLocalHistory || hasCachedSpotify || !serverHistory))
   ) {
     return buildBrowserHistoryUniverse(knownMeta, {

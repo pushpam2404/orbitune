@@ -46,7 +46,7 @@ export function createUniverseScene(canvasContainer) {
   const fallbackText = document.getElementById('webgl-fallback-text');
   renderer.domElement.addEventListener('webglcontextlost', (event) => {
     event.preventDefault();
-    if (fallbackText) fallbackText.textContent = 'The graphics context was lost. Astra will redraw as soon as the browser gives it back; if it does not, reload the page.';
+    if (fallbackText) fallbackText.textContent = 'The graphics context was lost. Orbitune will redraw as soon as the browser gives it back; if it does not, reload the page.';
     if (fallback) fallback.hidden = false;
   });
   renderer.domElement.addEventListener('webglcontextrestored', () => {

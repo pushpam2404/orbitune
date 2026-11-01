@@ -10,7 +10,7 @@ import { buildUniverseDataset } from './universeBuilder.js';
 import { enrichArtists, toCacheEntry } from './enrich.js';
 import { getLocalHistorySummary, getLocalHistoryStatus } from './historyLoader.js';
 
-const STATE_COOKIE = 'astra_oauth_state';
+const STATE_COOKIE = 'orbitune_oauth_state';
 
 export const apiRouter = express.Router();
 
@@ -145,7 +145,7 @@ async function universeHandler(req, res) {
         const wait = min >= 90 ? `about ${Math.round(min / 60)} hours` : `about ${min} minute${min === 1 ? '' : 's'}`;
         console.error('[universe] rate limited, Retry-After', err.retryAfterSec, 's');
         return res.status(429).json({
-          error: `Spotify is limiting requests from Astra for now. Your map will load again in ${wait}; reloading before then makes the wait longer.`
+          error: `Spotify is limiting requests from Orbitune for now. Your map will load again in ${wait}; reloading before then makes the wait longer.`
         });
       }
       return res.status(502).json({ error: `Spotify API error ${err.status} on ${err.endpoint}: ${err.message}` });

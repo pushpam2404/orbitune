@@ -55,7 +55,7 @@ async function lastfmTags(method, params, artistName) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    const res = await fetch(`${API}?${query}`, { signal: controller.signal, headers: { 'User-Agent': 'ASTRA-music-universe/1.0' } });
+    const res = await fetch(`${API}?${query}`, { signal: controller.signal, headers: { 'User-Agent': 'Orbitune/1.0' } });
     const json = await res.json().catch(() => ({}));
     if (json.error === 29) throw Object.assign(new Error('rate limited'), { rateLimited: true });
     if (json.error === 10 || json.error === 4) {
@@ -151,7 +151,7 @@ export async function lastfmArtistMbid(name) {
   if (!isLastfmConfigured()) return null;
   const query = new URLSearchParams({ method: 'artist.getinfo', api_key: key, format: 'json', autocorrect: '1', artist: name });
   try {
-    const res = await fetch(`${API}?${query}`, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), headers: { 'User-Agent': 'ASTRA-music-universe/1.0' } });
+    const res = await fetch(`${API}?${query}`, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), headers: { 'User-Agent': 'Orbitune/1.0' } });
     const json = await res.json().catch(() => ({}));
     return json.artist?.mbid || null;
   } catch {

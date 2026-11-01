@@ -1,20 +1,24 @@
 // src/api/historyStorage.js
 /**
  * Browser-side import, export, and IndexedDB persistence for Spotify Streaming History
- * and compiled Astra Universe snapshots.
+ * and compiled Orbitune Universe snapshots.
  */
 import { parseStreamingEvents } from '../etl/historyParser.js';
 import { isZipFile, extractZipEntries } from './zipReader.js';
 
-const DB_NAME = 'astra_history_db';
+const DB_NAME = 'orbitune_history_db';
+// Names from before the Astra -> Orbitune rename. Browsers and exported files may still hold them.
+const LEGACY_DB_NAME = 'astra_history_db';
+const LEGACY_STORAGE_PREFIX = 'astra_';
+const STORAGE_PREFIX = 'orbitune_';
 const STORE_NAME = 'kv';
 const HISTORY_KEY = 'imported_history_summary_v1';
 const SNAPSHOT_KEY = 'imported_universe_snapshot_v1';
 
-function openDb() {
+function openDb(name = DB_NAME) {
   return new Promise((resolve, reject) => {
     if (typeof indexedDB === 'undefined') return reject(new Error('IndexedDB unavailable'));
-    const req = indexedDB.open(DB_NAME, 1);
+    const req = indexedDB.open(name, 1);
     req.onupgradeneeded = () => {
       if (!req.result.objectStoreNames.contains(STORE_NAME)) {
         req.result.createObjectStore(STORE_NAME);
@@ -67,7 +71,60 @@ async function idbDelete(key) {
   }
 }
 
+/** Renames the old identity flags on a snapshot or history summary, in place. */
+export function upgradeLegacyFlags(record) {
+  if (!record || typeof record !== 'object') return record;
+  if (record.isAstraUniverseSnapshot) {
+    delete record.isAstraUniverseSnapshot;
+    record.isOrbituneUniverseSnapshot = true;
+  }
+  if (record.isAstraHistorySummary) {
+    delete record.isAstraHistorySummary;
+    record.isOrbituneHistorySummary = true;
+  }
+  upgradeLegacyFlags(record.historySummary);
+  return record;
+}
+
+/** Moves settings and caches saved under the old key prefix. Call before anything reads them. */
+export function migrateLegacyLocalStorage() {
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (!key.startsWith(LEGACY_STORAGE_PREFIX)) continue;
+      const renamed = STORAGE_PREFIX + key.slice(LEGACY_STORAGE_PREFIX.length);
+      if (localStorage.getItem(renamed) === null) localStorage.setItem(renamed, localStorage.getItem(key));
+      localStorage.removeItem(key);
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+let legacyDbMigration = null;
+
+/** Copies saved history out of the old database once, then deletes it. */
+function migrateLegacyDb() {
+  legacyDbMigration ??= (async () => {
+    if (typeof indexedDB === 'undefined' || !indexedDB.databases) return;
+    const databases = await indexedDB.databases();
+    if (!databases.some(db => db.name === LEGACY_DB_NAME)) return;
+    const legacy = await openDb(LEGACY_DB_NAME);
+    for (const key of [HISTORY_KEY, SNAPSHOT_KEY]) {
+      const value = await new Promise((resolve, reject) => {
+        const req = legacy.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(key);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+      if (value && !(await idbGet(key))) await idbSet(key, upgradeLegacyFlags(value));
+    }
+    legacy.close();
+    indexedDB.deleteDatabase(LEGACY_DB_NAME);
+  })().catch(() => {});
+  return legacyDbMigration;
+}
+
 export async function loadStoredHistorySummary() {
+  await migrateLegacyDb();
   return idbGet(HISTORY_KEY);
 }
 
@@ -77,6 +134,7 @@ export async function saveStoredHistorySummary(summary) {
 }
 
 export async function loadStoredUniverseSnapshot() {
+  await migrateLegacyDb();
   return idbGet(SNAPSHOT_KEY);
 }
 
@@ -92,8 +150,8 @@ export async function clearStoredHistory() {
 /**
  * Reads selected files (from folder upload, multi-file picker, or drag-and-drop).
  * Recognizes:
- *  - Exported Astra Universe Snapshot JSON (`isAstraUniverseSnapshot: true` or `{ dataset: { genres, artists, tracks } }`)
- *  - Pre-aggregated Astra History Summary JSON (`isAstraHistorySummary: true`)
+ *  - Exported Orbitune Universe Snapshot JSON (`isOrbituneUniverseSnapshot: true` or `{ dataset: { genres, artists, tracks } }`)
+ *  - Pre-aggregated Orbitune History Summary JSON (`isOrbituneHistorySummary: true`)
  *  - Raw Spotify Extended Streaming History (`Streaming_History_Audio_*.json`, `endsong_*.json`)
  *  - Standard Spotify Account Data (`StreamingHistory_music_*.json`, `StreamingHistory*.json`)
  */
@@ -127,8 +185,10 @@ export async function parseImportedFiles(fileList) {
       continue;
     }
 
-    // 1. Check if it's a full exported Astra Universe Snapshot
-    if (parsed && (parsed.isAstraUniverseSnapshot || (parsed.dataset?.genres && parsed.dataset?.artists && parsed.dataset?.tracks))) {
+    upgradeLegacyFlags(parsed);
+
+    // 1. Check if it's a full exported Orbitune Universe Snapshot
+    if (parsed && (parsed.isOrbituneUniverseSnapshot || (parsed.dataset?.genres && parsed.dataset?.artists && parsed.dataset?.tracks))) {
       return {
         kind: 'snapshot',
         snapshot: parsed,
@@ -139,8 +199,8 @@ export async function parseImportedFiles(fileList) {
       };
     }
 
-    // 2. Check if it's a pre-parsed Astra History Summary
-    if (parsed && parsed.isAstraHistorySummary && Array.isArray(parsed.artists)) {
+    // 2. Check if it's a pre-parsed Orbitune History Summary
+    if (parsed && parsed.isOrbituneHistorySummary && Array.isArray(parsed.artists)) {
       return {
         kind: 'history',
         historySummary: parsed,
@@ -194,7 +254,7 @@ function triggerDownload(blob, filename) {
 }
 
 /**
- * Exports the full compiled Astra Universe (clusters, artists, songs, 3D coordinates,
+ * Exports the full compiled Orbitune Universe (clusters, artists, songs, 3D coordinates,
  * temporal history insights, and cached genre metadata) as a portable `.json` file
  * that can be re-imported on any device instantly.
  */
@@ -202,13 +262,13 @@ export function exportUniverseSnapshotJson(dataset, artistMeta = {}, historySumm
   if (!dataset) return;
   const dateStr = new Date().toISOString().slice(0, 10);
   const payload = {
-    isAstraUniverseSnapshot: true,
+    isOrbituneUniverseSnapshot: true,
     exportedAt: new Date().toISOString(),
     version: '1.1.0',
     dataset,
     artistMeta,
     historySummary: historySummary ? {
-      isAstraHistorySummary: true,
+      isOrbituneHistorySummary: true,
       validPlays: historySummary.validPlays,
       totalHours: historySummary.totalHours,
       firstDate: historySummary.firstDate,
@@ -218,7 +278,7 @@ export function exportUniverseSnapshotJson(dataset, artistMeta = {}, historySumm
     } : dataset.historyMeta || null
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  triggerDownload(blob, `astra-universe-${dateStr}.json`);
+  triggerDownload(blob, `orbitune-universe-${dateStr}.json`);
 }
 
 /**
@@ -326,5 +386,5 @@ export function exportListeningHistoryCsv(dataset) {
     });
 
   const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8' });
-  triggerDownload(blob, `astra-listening-history-${dateStr}.csv`);
+  triggerDownload(blob, `orbitune-listening-history-${dateStr}.csv`);
 }

@@ -6,7 +6,7 @@
  * Entry shape: { g: string[] genres, c: string[] countries, t: lookup time (ms) }.
  */
 
-const STORAGE_KEY = 'astra_artist_meta_v1';
+const STORAGE_KEY = 'orbitune_artist_meta_v1';
 const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 // "Nothing found" is only remembered for a week: tags get added to Wikidata, MusicBrainz and Last.fm over time.
 const EMPTY_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;

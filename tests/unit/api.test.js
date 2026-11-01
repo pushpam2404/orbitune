@@ -23,12 +23,12 @@ test('auth status works without a session or Spotify credentials', async () => {
 });
 
 test('a forged session cookie does not log anyone in', async () => {
-  const res = await fetch(`${base}/api/auth/status`, { headers: { Cookie: 'astra_session=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' } });
+  const res = await fetch(`${base}/api/auth/status`, { headers: { Cookie: 'orbitune_session=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' } });
   assert.equal((await res.json()).loggedIn, false);
 });
 
 test('the universe route refuses anonymous callers, even with a history payload attached', async () => {
-  const res = await post('/api/universe', JSON.stringify({ historySummary: { isAstraHistorySummary: true, artists: [], tracks: [] } }));
+  const res = await post('/api/universe', JSON.stringify({ historySummary: { isOrbituneHistorySummary: true, artists: [], tracks: [] } }));
   assert.equal(res.status, 401);
 });
 

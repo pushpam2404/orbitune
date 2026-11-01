@@ -1,25 +1,25 @@
-# Astra
+# Orbitune
 
-[![CI](https://github.com/pushpam2404/astra-3d-music-universe/actions/workflows/ci.yml/badge.svg)](https://github.com/pushpam2404/astra-3d-music-universe/actions/workflows/ci.yml)
+[![CI](https://github.com/pushpam2404/orbitune/actions/workflows/ci.yml/badge.svg)](https://github.com/pushpam2404/orbitune/actions/workflows/ci.yml)
 
-Astra turns your Spotify listening into a 3D map you can fly around. Artists that share genres, a home country, collaborations or listening sessions end up in the same cluster. Each cluster gets a planet at its centre, artists orbit it as smaller planets, and songs circle their artist as faceted moons.
+Orbitune turns your Spotify listening into a 3D map you can fly around. Artists that share genres, a home country, collaborations or listening sessions end up in the same cluster. Each cluster gets a planet at its centre, artists orbit it as smaller planets, and songs circle their artist as faceted moons.
 
-Live: https://astra-3d-music-universe.vercel.app
+Live: https://orbitune-music.vercel.app
 
-![Astra's map of a listening history, seven clusters with names](docs/screenshots/overview.png)
+![Orbitune's map of a listening history, seven clusters with names](docs/screenshots/overview.png)
 
 The screenshots in this README come from a synthetic history I generated for 90 well-known artists, not from anyone's real account. Genres were looked up through the app's normal pipeline, so a few artists land in odd clusters (Taylor Swift ends up next to Daft Punk) where the lookup found no usable tags.
 
 ## What it does
 
-You can feed Astra two ways, and combine them.
+You can feed Orbitune two ways, and combine them.
 
 - Connect Spotify to read your top artists and tracks for three time ranges, recent plays and Liked Songs.
 - Import your Spotify "Extended Streaming History" (the `.zip` as downloaded, the unzipped folder, or the `Streaming_History_Audio_*.json` files). Parsing and clustering run in the browser, so a 100 MB export never goes through a server.
 
 From there:
 
-- Genres come from public data, because Spotify no longer returns artist genres to apps in development mode. Astra looks artists up on Wikidata and MusicBrainz, plus Last.fm if you give it an API key, and keeps the results in `localStorage` for 30 days.
+- Genres come from public data, because Spotify no longer returns artist genres to apps in development mode. Orbitune looks artists up on Wikidata and MusicBrainz, plus Last.fm if you give it an API key, and keeps the results in `localStorage` for 30 days.
 - Clusters are found with Louvain community detection on a similarity graph (shared genres and countries, collaborations, songs played in the same session). Positions come from a 3D UMAP embedding, then a collision pass keeps planets from overlapping.
 - Cluster names are picked from the genres that set a cluster apart from the others (class-based TF-IDF). If a group has no real genre of its own it is merged elsewhere or labelled "Genre Unknown" instead of getting an invented name.
 - Lenses filter the whole map and the side panel together: past favourites, things you have not heard in a while, current rotation, all-time staples, and one lens per year in your history. "Replay years" steps through the years.
@@ -62,8 +62,8 @@ localStorage: Spotify signals (6 h),              /api/genre-vocabulary  genre c
 You need Node 20.12 or newer. Spotify credentials are optional if you only want to explore an imported history.
 
 ```bash
-git clone https://github.com/pushpam2404/astra-3d-music-universe.git
-cd astra-3d-music-universe
+git clone https://github.com/pushpam2404/orbitune.git
+cd orbitune
 npm install
 cp .env.example .env     # fill in what you have
 npm run dev              # http://127.0.0.1:5173

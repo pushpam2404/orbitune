@@ -21,7 +21,7 @@ if (config.isProd) {
 }
 
 app.listen(config.port, config.host, () => {
-  console.log(`ASTRA running at http://${config.host}:${config.port}/`);
+  console.log(`Orbitune running at http://${config.host}:${config.port}/`);
   if (!isSpotifyConfigured()) {
     console.warn('Spotify not configured: set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in .env');
   } else {

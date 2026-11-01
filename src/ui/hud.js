@@ -357,13 +357,13 @@ export class Hud {
       const input = $(id);
       if (!input) return;
       try {
-        const saved = localStorage.getItem(`astra_${id}`);
+        const saved = localStorage.getItem(`orbitune_${id}`);
         if (saved !== null) input.value = saved;
       } catch { /* storage unavailable */ }
       // Start the orbit slider paused for people who asked their system for less motion.
       if (id === 'orbit-speed-slider' && input.value === input.defaultValue &&
           window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-        try { if (localStorage.getItem(`astra_${id}`) === null) input.value = '0'; } catch { input.value = '0'; }
+        try { if (localStorage.getItem(`orbitune_${id}`) === null) input.value = '0'; } catch { input.value = '0'; }
       }
       // Only a move of the slider is stored, so the reduced-motion default above never sticks.
       const apply = (event) => {
@@ -372,7 +372,7 @@ export class Hud {
         if (lbl) lbl.textContent = format(v);
         onChange(v);
         if (event?.type === 'input') {
-          try { localStorage.setItem(`astra_${id}`, input.value); } catch { /* ignore */ }
+          try { localStorage.setItem(`orbitune_${id}`, input.value); } catch { /* ignore */ }
         }
       };
       input.addEventListener('input', apply);
@@ -1039,7 +1039,7 @@ export class Hud {
         window.location.href = SPOTIFY_LOGIN_URL;
         return;
       }
-      if (confirm('Disconnect Spotify from Astra on this browser?')) {
+      if (confirm('Disconnect Spotify from Orbitune on this browser?')) {
         await logout().catch(() => {});
         this.setAuthStatus({ ...status, loggedIn: false, missingScopes: [] });
         this.cb.onDisconnected();

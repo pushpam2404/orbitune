@@ -7,7 +7,7 @@
  */
 
 const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
-const USER_AGENT = 'ASTRA-music-universe/1.0 (https://astra-3d-music-universe.vercel.app)';
+const USER_AGENT = 'Orbitune/1.0 (https://orbitune-music.vercel.app)';
 const TIMEOUT_MS = 25000;
 // Ids per SPARQL query; large VALUES blocks get slow.
 const CHUNK_SIZE = 250;
