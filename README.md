@@ -6,9 +6,9 @@ Orbitune turns your Spotify listening into a 3D map you can fly around. Artists 
 
 Live: https://orbitune-music.vercel.app
 
-![Orbitune's map of a listening history, seven clusters with names](docs/screenshots/overview.png)
+![Orbitune's map of my listening history, 20 named clusters, with the Memories panel open](docs/screenshots/overview.png)
 
-The screenshots in this README come from a synthetic history I generated for 90 well-known artists, not from anyone's real account. Genres were looked up through the app's normal pipeline, so a few artists land in odd clusters (Taylor Swift ends up next to Daft Punk) where the lookup found no usable tags.
+The desktop screenshots in this README show my own listening history merged with my Spotify account: 3,363 artists, 7,776 songs and 51,772 plays from 2020 to 2026. The phone screenshots still come from a synthetic history of 90 well-known artists, so a few artists land in odd clusters there.
 
 ## What it does
 
@@ -26,9 +26,9 @@ From there:
 - Selected artist, cluster and lens live in the URL (`?node=&lens=`), so Back and Forward work and links reopen the same view.
 - You can export the computed map as a snapshot `.json` to re-import later, or the aggregated history as `.csv`.
 
-| Cluster focus | Artist | Lens: current rotation |
+| Cluster focus | Artist | Lens: past favorites |
 |---|---|---|
-| ![A single cluster with its side panel](docs/screenshots/cluster.png) | ![One artist with its songs and timeline](docs/screenshots/artist.png) | ![Map filtered to current rotation](docs/screenshots/lens-current-rotation.png) |
+| ![The Alternative & Indie Rock cluster with its side panel](docs/screenshots/cluster.png) | ![Arctic Monkeys with their songs and timeline](docs/screenshots/artist.png) | ![Map filtered to past favorites](docs/screenshots/lens-past-favorites.png) |
 
 | Mobile | Mobile, cluster sheet | No WebGL |
 |---|---|---|
